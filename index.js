@@ -1,15 +1,3 @@
-function generateUniqueSudoku() {
-  const board = Array.from({ length: 9 }, () => Array(9).fill(0));
-
-  // Step 1: Generate a complete, valid Sudoku solution
-  fillBoard(board);
-
-  // Step 2: Remove cells and ensure a unique solution
-  removeCellsForUniquePuzzle(board, 40); // Adjust for desired difficulty
-
-  return board;
-}
-
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     // Check if num is already in the row or column, ignoring the (row, col) cell itself
@@ -126,39 +114,38 @@ let selectedRow = 0;
 
 // Render the generated puzzle on the UI
 const canvas = document.querySelector("canvas#sudokuGrid");
-function renderPuzzle(board) {
+function renderPuzzle() {
   const ctx = canvas.getContext("2d");
   ctx.font = "20px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.scale(2, 2);
 
-  const selectedValue = board[selectedRow][selectedCol];
+  const selectedValue = puzzle[selectedRow][selectedCol];
   const selectedGroup = Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3);
 
-  board.forEach((row, rowIndex) => {
+  puzzle.forEach((row, rowIndex) => {
     row.forEach((value, colIndex) => {
+      const readonly = puzzleReadonly[rowIndex][colIndex];
+      const valid = readonly || isValid(puzzle, rowIndex, colIndex, value);
       ctx.fillStyle = "#fff";
       const groupIndex = Math.floor(rowIndex / 3) * 3 + Math.floor(colIndex / 3);
       if (value && value === selectedValue) ctx.fillStyle = "rgb(196 215 234)";
       if (rowIndex === selectedRow || colIndex === selectedCol || groupIndex === selectedGroup)
         ctx.fillStyle = "rgb(227 235 243)";
       if (rowIndex === selectedRow && colIndex === selectedCol) ctx.fillStyle = "rgb(178 223 254)";
+      if (value && !valid) ctx.fillStyle = "rgb(247, 205, 213)";
       ctx.fillRect(40 * colIndex, 40 * rowIndex, 40, 40);
       if (value) {
         ctx.fillStyle = "#000";
-        ctx.fillText(value, 40 * colIndex + 20, rowIndex * 40 + 20);
+        if (!readonly) ctx.fillStyle = "rgb(60, 89, 169)";
+        if (!valid) ctx.fillStyle = "rgb(215, 46, 63)";
+        ctx.fillText(value, 40 * colIndex + 21, rowIndex * 40 + 21);
       }
-      // const cell = document.createElement("input");
-      // cell.type = "text";
-      // cell.maxLength = 1;
-      // cell.className = "cell";
-      // cell.value = value || "";
-      // cell.readOnly = value !== 0;
-      // cell.classList.toggle("readonly", value !== 0);
-      // cell.addEventListener("input", (e) => handleInput(e, rowIndex, colIndex));
     });
   });
 
+  // Draw grid lines
   ctx.fillStyle = "#ccc";
   for (let i = 0; i < 9; i++) {
     if (i % 3 === 0) continue;
@@ -171,35 +158,23 @@ function renderPuzzle(board) {
     ctx.fillRect(i * 40, 0, 2, 9 * 40 + 2);
     ctx.fillRect(0, i * 40, 9 * 40 + 2, 2);
   }
-}
 
-// Update board with user input
-const board = Array.from({ length: 9 }, () => Array(9).fill(0));
-function handleInput(event, row, col) {
-  const value = parseInt(event.target.value);
-  if (!isNaN(value) && value >= 1 && value <= 9) {
-    board[row][col] = value;
-  } else {
-    event.target.value = "";
-    board[row][col] = 0;
-  }
+  ctx.resetTransform();
 }
 
 // Generate and display a new puzzle
+let puzzle = undefined;
+let puzzleReadonly = undefined;
 function generatePuzzle() {
-  const newBoard = generateSudoku();
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      board[i][j] = newBoard[i][j];
-    }
-  }
-  renderPuzzle(board);
+  puzzle = generateSudoku();
+  puzzleReadonly = puzzle.map((row) => row.map((cell) => cell !== 0));
+  renderPuzzle();
 }
 
 // Check if the current board is solved correctly
 function checkSolution() {
-  const isComplete = board.every((row, rowIndex) =>
-    row.every((cell, colIndex) => isValid(board, rowIndex, colIndex, cell)),
+  const isComplete = puzzle.every((row, rowIndex) =>
+    row.every((cell, colIndex) => isValid(puzzle, rowIndex, colIndex, cell)),
   );
   alert(
     isComplete ? "Congratulations! Puzzle solved correctly." : "There are errors in your solution.",
@@ -220,14 +195,22 @@ document.addEventListener("keydown", (e) => {
     case "ArrowDown":
       selectedRow = Math.min(8, selectedRow + 1);
       break;
+    case "Backspace":
+    case "Delete":
+      if (!puzzleReadonly[selectedRow][selectedCol]) {
+        puzzle[selectedRow][selectedCol] = 0;
+      }
+      break;
   }
-  if (e.key >= 1 && e.key <= 9) board[selectedRow][selectedCol] = parseInt(e.key);
-  renderPuzzle(board);
+  if (e.key >= 1 && e.key <= 9 && !puzzleReadonly[selectedRow][selectedCol]) {
+    puzzle[selectedRow][selectedCol] = parseInt(e.key);
+  }
+  renderPuzzle();
 });
 canvas.addEventListener("pointerdown", (e) => {
   selectedCol = Math.min(8, Math.floor(e.offsetX / 40));
   selectedRow = Math.min(8, Math.floor(e.offsetY / 40));
-  renderPuzzle(board);
+  renderPuzzle();
 });
 
 // Initial puzzle generation

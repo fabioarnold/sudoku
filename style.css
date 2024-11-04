@@ -12,8 +12,8 @@ h1 {
     color: #333;
 }
 #sudokuGrid {
-    width: 374px;
-    height: 374px;
+    width: 362px;
+    height: 362px;
     image-rendering: pixelated;
 }
 .controls {
