@@ -1,20 +1,16 @@
-body {
+* {
     font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
     margin: 0;
-    box-sizing: border-box;
 }
 h1 {
     color: #333;
-}
-#sudokuGrid {
-    width: 362px;
-    height: 362px;
-    image-rendering: pixelated;
 }
 .controls {
     margin-top: 20px;
@@ -23,4 +19,49 @@ button {
     padding: 10px 15px;
     font-size: 1em;
     cursor: pointer;
+}
+
+.grid {
+    width: 374px;
+    aspect-ratio: 1;
+    font-size: 20px;
+    background-color: #000;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 2px;
+    .box {
+        background-color: #ccc;
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        .cell {
+            color: rgb(60, 89, 169);
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+            &.readonly {
+                color: #000;
+            }
+            &.group {
+                background-color: rgb(227 235 243);
+            }
+            &.same {
+                background-color: rgb(196 215 234);
+            }
+            &.selected {
+                background-color: rgb(178 223 254);
+            }
+            &.invalid {
+                color: rgb(215, 46, 63);
+                background-color: rgb(247, 205, 213);
+            }
+        }
+    }
 }
