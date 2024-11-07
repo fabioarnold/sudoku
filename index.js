@@ -130,11 +130,28 @@ function generatePuzzle() {
 // Check if the current board is solved correctly
 function checkSolution() {
   const isComplete = puzzle.every((row, rowIndex) =>
-    row.every((cell, colIndex) => isValid(puzzle, rowIndex, colIndex, cell)),
+    row.every((cell, colIndex) => cell && isValid(puzzle, rowIndex, colIndex, cell)),
   );
-  alert(
-    isComplete ? "Congratulations! Puzzle solved correctly." : "There are errors in your solution.",
-  );
+  if (isComplete && timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = undefined;
+    alert(`Congratulations! Puzzle solved correctly in ${timeSpan.innerText}.`);
+  }
+}
+
+function setValue(value) {
+  const selectedRow = parseInt(selectedCell.dataset.row);
+  const selectedCol = parseInt(selectedCell.dataset.col);
+  puzzle[selectedRow][selectedCol] = value;
+  selectedCell.innerText = value;
+  checkSolution();
+}
+
+function clearValue() {
+  const selectedRow = parseInt(selectedCell.dataset.row);
+  const selectedCol = parseInt(selectedCell.dataset.col);
+  puzzle[selectedRow][selectedCol] = 0;
+  selectedCell.innerText = "";
 }
 
 document.addEventListener("keydown", (e) => {
@@ -157,20 +174,19 @@ document.addEventListener("keydown", (e) => {
     case "Backspace":
     case "Delete":
       if (!selectedCell.classList.contains("readonly")) {
-        puzzle[selectedRow][selectedCol] = 0;
-        selectedCell.innerText = "";
+        clearValue();
       }
       break;
   }
   selectedCell = grid.querySelector(`[data-row="${selectedRow}"][data-col="${selectedCol}"]`);
   if (e.key >= 1 && e.key <= 9 && !selectedCell.classList.contains("readonly")) {
-    puzzle[selectedRow][selectedCol] = parseInt(e.key);
-    selectedCell.innerText = puzzle[selectedRow][selectedCol];
+    setValue(parseInt(e.key));
   }
   updateClasses();
 });
 
 let selectedCell;
+const timeSpan = document.querySelector("#time span");
 const grid = document.querySelector("#sudokuGrid");
 const candidates = document.querySelector("#candidates");
 const deleteButton = document.querySelector("#delete.button");
@@ -197,10 +213,7 @@ function generateDom() {
     candidate.classList.add("button");
     candidate.innerText = i + 1;
     candidate.addEventListener("pointerdown", (e) => {
-      selectedCell.innerText = e.target.innerText;
-      const selectedRow = parseInt(selectedCell.dataset.row);
-      const selectedCol = parseInt(selectedCell.dataset.col);
-      puzzle[selectedRow][selectedCol] = parseInt(selectedCell.innerText);
+      setValue(parseInt(e.target.innerText));
       updateClasses();
     });
     candidates.appendChild(candidate);
@@ -271,7 +284,19 @@ function updateClasses() {
   }
 }
 
+let timerSeconds = 0;
+let timerInterval;
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    const minutes = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
+    const seconds = String(timerSeconds % 60).padStart(2, "0");
+    timeSpan.innerText = `${minutes}:${seconds}`;
+  }, 1000);
+}
+
 generateDom();
 
-// Initial puzzle generation
 generatePuzzle();
+
+startTimer();
