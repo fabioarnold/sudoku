@@ -14,29 +14,9 @@ body {
 h1 {
     color: #333;
 }
-#candidates {
-    display: flex;
-    gap: 1px;
-    .candidate {
-        text-align: center;
-        font-size: 28px;
-        line-height: 40px;
-        width: 40px;
-        -webkit-user-select: none;
-        user-select: none;
-        cursor: pointer;
-        &.hidden {
-            visibility: hidden;
-        }
-        &.disabled {
-            color: #888;
-            pointer-events: none;
-        }
-    }
-}
 
 .grid {
-    width: 374px;
+    width: 400px;
     aspect-ratio: 1;
     font-size: 22px;
     background-color: #000;
@@ -77,5 +57,31 @@ h1 {
                 background-color: rgb(178 223 254);
             }
         }
+    }
+}
+
+#controls {
+    display: flex;
+    .button {
+        text-align: center;
+        font-size: 28px;
+        line-height: 40px;
+        width: 40px;
+        -webkit-user-select: none;
+        user-select: none;
+        cursor: pointer;
+        &.hidden {
+            visibility: hidden;
+        }
+        &.disabled {
+            color: #888;
+            pointer-events: none;
+        }
+    }
+    #candidates {
+        display: flex;
+    }
+    #delete {
+        font-size: 20px;
     }
 }

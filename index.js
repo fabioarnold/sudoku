@@ -173,6 +173,7 @@ document.addEventListener("keydown", (e) => {
 let selectedCell;
 const grid = document.querySelector("#sudokuGrid");
 const candidates = document.querySelector("#candidates");
+const deleteButton = document.querySelector("#delete.button");
 function generateDom() {
   for (let bi = 0; bi < 9; bi++) {
     const box = document.createElement("div");
@@ -193,14 +194,24 @@ function generateDom() {
   }
   for (let i = 0; i < 9; i++) {
     const candidate = document.createElement("div");
-    candidate.classList.add("candidate");
+    candidate.classList.add("button");
     candidate.innerText = i + 1;
     candidate.addEventListener("pointerdown", (e) => {
       selectedCell.innerText = e.target.innerText;
+      const selectedRow = parseInt(selectedCell.dataset.row);
+      const selectedCol = parseInt(selectedCell.dataset.col);
+      puzzle[selectedRow][selectedCol] = parseInt(selectedCell.innerText);
       updateClasses();
     });
     candidates.appendChild(candidate);
   }
+  deleteButton.addEventListener("pointerdown", (e) => {
+    selectedCell.innerText = "";
+    const selectedRow = parseInt(selectedCell.dataset.row);
+    const selectedCol = parseInt(selectedCell.dataset.col);
+    puzzle[selectedRow][selectedCol] = 0;
+    updateClasses();
+  });
 }
 
 function updateClasses() {
@@ -242,7 +253,7 @@ function updateClasses() {
   });
   selectedCell.classList.add("selected");
 
-  candidates.querySelectorAll(".candidate").forEach((candidate) => {
+  candidates.querySelectorAll(".button").forEach((candidate) => {
     candidate.classList.remove("disabled");
     candidate.classList.remove("hidden");
     if (selectedCell.classList.contains("readonly")) {
@@ -252,6 +263,12 @@ function updateClasses() {
       candidate.classList.add("hidden");
     }
   });
+
+  if (selectedCell.classList.contains("readonly") || !selectedCell.innerText) {
+    deleteButton.classList.add("disabled");
+  } else {
+    deleteButton.classList.remove("disabled");
+  }
 }
 
 generateDom();
