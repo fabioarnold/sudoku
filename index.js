@@ -100,19 +100,12 @@ function removeCellsForUniquePuzzle(board, numCellsToRemove) {
 // master = 81 - 27
 // extreme = 81 - 23
 
-// Placeholder for generating and solving functions
-function generateSudoku() {
-  // Use the logic provided in the previous JavaScript solution to generate a Sudoku puzzle
-  const board = Array.from({ length: 9 }, () => Array(9).fill(0));
-  fillBoard(board);
-  removeCellsForUniquePuzzle(board, 40);
-  return board;
-}
-
-// Generate and display a new puzzle
 let puzzle = undefined;
 function generatePuzzle() {
-  puzzle = generateSudoku();
+  puzzle = Array.from({ length: 9 }, () => Array(9).fill(0));
+  fillBoard(puzzle);
+  removeCellsForUniquePuzzle(puzzle, 40);
+
   grid.querySelectorAll(".cell").forEach((c) => {
     const value = puzzle[c.dataset.row][c.dataset.col];
     if (value > 0) {
@@ -127,7 +120,6 @@ function generatePuzzle() {
   updateClasses();
 }
 
-// Check if the current board is solved correctly
 function checkSolution() {
   const isComplete = puzzle.every((row, rowIndex) =>
     row.every((cell, colIndex) => cell && isValid(puzzle, rowIndex, colIndex, cell)),
