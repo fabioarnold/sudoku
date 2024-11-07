@@ -123,6 +123,7 @@ function generatePuzzle() {
       c.classList.remove("readonly");
     }
   });
+  selectedCell = document.querySelector(".cell:not(.readonly)");
   updateClasses();
 }
 
@@ -137,7 +138,6 @@ function checkSolution() {
 }
 
 document.addEventListener("keydown", (e) => {
-  if (!selectedCell) return;
   e.preventDefault();
   let selectedRow = parseInt(selectedCell.dataset.row);
   let selectedCol = parseInt(selectedCell.dataset.col);
@@ -170,8 +170,9 @@ document.addEventListener("keydown", (e) => {
   updateClasses();
 });
 
-let selectedCell = undefined;
+let selectedCell;
 const grid = document.querySelector("#sudokuGrid");
+const candidates = document.querySelector("#candidates");
 function generateDom() {
   for (let bi = 0; bi < 9; bi++) {
     const box = document.createElement("div");
@@ -183,22 +184,38 @@ function generateDom() {
       cell.dataset.box = bi;
       cell.dataset.row = Math.floor(bi / 3) * 3 + Math.floor(ci / 3);
       cell.dataset.col = (bi % 3) * 3 + (ci % 3);
-      cell.addEventListener("click", (e) => {
+      cell.addEventListener("pointerdown", (e) => {
         selectedCell = e.target;
         updateClasses();
       });
       box.appendChild(cell);
     }
   }
+  for (let i = 0; i < 9; i++) {
+    const candidate = document.createElement("div");
+    candidate.classList.add("candidate");
+    candidate.innerText = i + 1;
+    candidate.addEventListener("pointerdown", (e) => {
+      selectedCell.innerText = e.target.innerText;
+      updateClasses();
+    });
+    candidates.appendChild(candidate);
+  }
 }
 
 function updateClasses() {
+  const counts = {};
+  for (let i = 1; i <= 9; i++) {
+    counts[i.toString()] = 0;
+  }
+
   grid.querySelectorAll(".cell").forEach((cell) => {
     cell.classList.remove("selected");
     cell.classList.remove("group");
     cell.classList.remove("same");
     cell.classList.remove("invalid");
     if (cell.innerText) {
+      counts[cell.innerText]++;
       if (!cell.classList.contains("readonly")) {
         if (
           !isValid(
@@ -224,6 +241,17 @@ function updateClasses() {
     }
   });
   selectedCell.classList.add("selected");
+
+  candidates.querySelectorAll(".candidate").forEach((candidate) => {
+    candidate.classList.remove("disabled");
+    candidate.classList.remove("hidden");
+    if (selectedCell.classList.contains("readonly")) {
+      candidate.classList.add("disabled");
+    }
+    if (counts[candidate.innerText] >= 9) {
+      candidate.classList.add("hidden");
+    }
+  });
 }
 
 generateDom();
